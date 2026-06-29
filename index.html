@@ -1,10 +1,366 @@
 <!DOCTYPE html>
-<html>
-</head>
-    <title>Кирилл мяу</title>tittle>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💜 Кирюша из ГЗ</title>
+  <style>
+    /* ----- Сброс и база ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0b0b0b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ----- Контейнер с игрой (поверх фона) ----- */
+    .game-container {
+      max-width: 680px;
+      width: 100%;
+      background: rgba(20, 20, 30, 0.75);
+      backdrop-filter: blur(2px);
+      border-radius: 56px;
+      padding: 32px 28px 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 2px #3a2a4a inset;
+      border: 1px solid #7a5a9a;
+      position: relative;
+      z-index: 10;
+      transition: opacity 0.2s;
+    }
+
+    /* ----- Заголовок (привет) ----- */
+    .main-title {
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: #d9b0ff;
+      text-align: center;
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px #b380e0, 0 0 30px #5a2d7a;
+      margin-bottom: 28px;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .main-title span {
+      color: #f0d0ff;
+    }
+
+    /* ----- Блок вопросов / ответов ----- */
+    .question-block {
+      background: #15151e;
+      border-radius: 40px;
+      padding: 28px 20px 24px;
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.7), 0 8px 0 #2a1e32;
+      border: 1px solid #60407a;
+    }
+
+    .question-text {
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: #e9d0ff;
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 0 6px;
+      text-shadow: 0 0 8px #a070c0;
+      line-height: 1.3;
+      min-height: 4rem;
+    }
+
+    .answers-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px 18px;
+      margin-top: 6px;
+    }
+
+    .answer-btn {
+      background: #1f1a2b;
+      border: 2px solid #7a5a9a;
+      color: #e4caff;
+      font-size: 1.6rem;
+      font-weight: 600;
+      padding: 16px 34px;
+      border-radius: 60px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #2f1f3f, 0 10px 18px rgba(0,0,0,0.5);
+      transition: all 0.07s ease;
+      letter-spacing: 0.5px;
+      background: linear-gradient(145deg, #221c2e, #18141f);
+      flex: 0 1 auto;
+      min-width: 130px;
+      text-align: center;
+    }
+
+    .answer-btn:hover {
+      transform: scale(1.03);
+      background: #2d2540;
+      border-color: #b080e0;
+      box-shadow: 0 6px 0 #3f2a55, 0 12px 24px rgba(120, 70, 180, 0.3);
+    }
+
+    .answer-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #2f1f3f;
+    }
+
+    /* ----- Сообщения (реакции) ----- */
+    .reaction-message {
+      font-size: 2.2rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 18px 12px;
+      background: #1a1422;
+      border-radius: 60px;
+      margin-top: 20px;
+      border: 2px solid #8a6aaa;
+      color: #f5daff;
+      text-shadow: 0 0 18px #b888f0;
+      letter-spacing: 1px;
+      box-shadow: inset 0 0 20px #2a1a3a;
+      transition: 0.15s;
+      word-break: break-word;
+    }
+
+    .reaction-message.win {
+      border-color: #c89aff;
+      background: #221a30;
+      color: #f0e0ff;
+      font-size: 2.5rem;
+    }
+
+    /* ----- Финальный экран (ура) ----- */
+    .final-message {
+      font-size: 2.6rem;
+      font-weight: 800;
+      text-align: center;
+      color: #ecc0ff;
+      text-shadow: 0 0 30px #a060d0, 0 0 60px #6a3a8a;
+      padding: 30px 10px;
+      background: #110d18;
+      border-radius: 60px;
+      border: 3px solid #b080e0;
+      box-shadow: 0 0 40px #4a2a5a;
+      line-height: 1.4;
+    }
+
+    /* ----- Падающие сердечки (фон) ----- */
+    .heart-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      top: -60px;
+      font-size: 2.2rem;
+      opacity: 0.5;
+      color: #b07ad0;
+      text-shadow: 0 0 20px #b070e0, 0 0 40px #9040b0;
+      animation: drop linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes drop {
+      0% { transform: translateY(-80px) rotate(0deg) scale(0.8); opacity: 0.3; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.9; }
+      100% { transform: translateY(110vh) rotate(720deg) scale(1.2); opacity: 0.1; }
+    }
+
+    /* ----- Адаптивность ----- */
+    @media (max-width: 550px) {
+      .game-container { padding: 20px 16px 28px; }
+      .main-title { font-size: 1.9rem; }
+      .question-text { font-size: 1.6rem; }
+      .answer-btn { font-size: 1.4rem; padding: 14px 20px; min-width: 100px; }
+      .reaction-message { font-size: 1.8rem; }
+      .final-message { font-size: 2rem; }
+    }
+  </style>
+</head>
 <body>
-    <h1>Привет, кирюшачка</h1>
-    <p1>этот сайт станет твоим вечным собутыльником.</p1>
+
+  <!-- ====== ФОН с падающими сердечками ====== -->
+  <div class="heart-rain" id="heartRain" aria-hidden="true"></div>
+
+  <!-- ====== ОСНОВНОЙ КОНТЕЙНЕР ====== -->
+  <div class="game-container" id="app">
+    <!-- Заголовок (всегда виден) -->
+    <div class="main-title">💜 привет нашему <span>любимому кирюше из гз</span> 💜</div>
+
+    <!-- Динамический блок -->
+    <div class="question-block" id="dynamicBlock">
+      <!-- сюда рендерится всё содержимое через JS -->
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // ----- DOM ссылки -----
+      const dynamicBlock = document.getElementById('dynamicBlock');
+
+      // ----- Состояние игры -----
+      let currentStep = 'start';        // start | q1 | q2 | final
+
+      // ----- Вспомогательный рендер -----
+      function render(html) {
+        dynamicBlock.innerHTML = html;
+      }
+
+      // ----- Обработчики кнопок (навешиваются после рендера) -----
+      function attachHandlers() {
+        // Все кнопки с data-action
+        document.querySelectorAll('[data-action]').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            const action = this.dataset.action;
+            const value = this.dataset.value || '';
+
+            switch (action) {
+              case 'answer_no':      // "нет"
+                showReaction('не пизди');
+                break;
+
+              case 'answer_yes':     // "да" → переходим к вопросу 1
+                goToQuestion1();
+                break;
+
+              case 'q1_answer':      // вопрос 1 (как меня зовут)
+                handleQ1(value);
+                break;
+
+              case 'q2_answer':      // вопрос 2 (любимый цвет)
+                handleQ2(value);
+                break;
+
+              default: break;
+            }
+          });
+        });
+      }
+
+      // ----- Показать реакцию (сообщение вместо кнопок) -----
+      function showReaction(text, isWin = false) {
+        const cls = isWin ? 'reaction-message win' : 'reaction-message';
+        render(`
+          <div class="${cls}">${text}</div>
+        `);
+        // на реакциях кнопок нет, обработчики не нужны
+      }
+
+      // ----- Переход к первому вопросу (после "да") -----
+      function goToQuestion1() {
+        currentStep = 'q1';
+        render(`
+          <div class="question-text">как меня зовут?</div>
+          <div class="answers-grid">
+            <button class="answer-btn" data-action="q1_answer" data-value="кристина">кристина</button>
+            <button class="answer-btn" data-action="q1_answer" data-value="катя">катя</button>
+            <button class="answer-btn" data-action="q1_answer" data-value="альбина">альбина</button>
+            <button class="answer-btn" data-action="q1_answer" data-value="соня">соня</button>
+          </div>
+        `);
+        attachHandlers();
+      }
+
+      // ----- Обработка ответа на вопрос 1 -----
+      function handleQ1(value) {
+        if (value === 'соня') {
+          // переходим ко второму вопросу
+          currentStep = 'q2';
+          render(`
+            <div class="question-text">какой у меня любимый цвет?</div>
+            <div class="answers-grid">
+              <button class="answer-btn" data-action="q2_answer" data-value="черный">черный</button>
+              <button class="answer-btn" data-action="q2_answer" data-value="белый">белый</button>
+              <button class="answer-btn" data-action="q2_answer" data-value="фиолетовый">фиолетовый</button>
+              <button class="answer-btn" data-action="q2_answer" data-value="сиренивый">сиренивый</button>
+            </div>
+          `);
+          attachHandlers();
+        } else {
+          // любой другой вариант → "уже другую нашел пидорас"
+          showReaction('уже другую нашел пидорас');
+          // после этой реакции игра останавливается (нет кнопок)
+        }
+      }
+
+      // ----- Обработка ответа на вопрос 2 -----
+      function handleQ2(value) {
+        if (value === 'сиренивый') {
+          // ФИНАЛ
+          currentStep = 'final';
+          render(`
+            <div class="final-message">
+              ура молодец.<br> Не грешил наверное.
+            </div>
+          `);
+          // финал — больше никаких кнопок
+        } else {
+          // любой другой → "неееееет"
+          showReaction('неееееет');
+        }
+      }
+
+      // ----- СТАРТ (первый экран) -----
+      function renderStart() {
+        currentStep = 'start';
+        render(`
+          <div class="question-text">ты же любишь меня)?</div>
+          <div class="answers-grid">
+            <button class="answer-btn" data-action="answer_no">нет</button>
+            <button class="answer-btn" data-action="answer_yes">да</button>
+          </div>
+        `);
+        attachHandlers();
+      }
+
+      // ====== ГЕНЕРАЦИЯ СЕРДЕЧЕК (фон) ======
+      function createHearts() {
+        const container = document.getElementById('heartRain');
+        if (!container) return;
+        const count = 35;
+        for (let i = 0; i < count; i++) {
+          const heart = document.createElement('div');
+          heart.className = 'heart';
+          heart.textContent = ['♥', '♡', '❤', '💜', '🩷', '💗'][Math.floor(Math.random() * 6)];
+          heart.style.left = Math.random() * 100 + '%';
+          heart.style.fontSize = (1.4 + Math.random() * 2.6) + 'rem';
+          heart.style.animationDuration = (8 + Math.random() * 18) + 's';
+          heart.style.animationDelay = (Math.random() * 18) + 's';
+          heart.style.opacity = 0.3 + Math.random() * 0.5;
+          container.appendChild(heart);
+        }
+      }
+
+      // ====== ИНИЦИАЛИЗАЦИЯ ======
+      function init() {
+        createHearts();
+        renderStart();
+      }
+
+      init();
+
+    })();
+  </script>
 </body>
 </html>
